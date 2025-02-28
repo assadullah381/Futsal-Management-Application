@@ -1,0 +1,2 @@
+D:/Desktop/futolo/android/app/.cxx/Debug/442229x5/x86/CMakeFiles/edit_cache.dir
+D:/Desktop/futolo/android/app/.cxx/Debug/442229x5/x86/CMakeFiles/rebuild_cache.dir

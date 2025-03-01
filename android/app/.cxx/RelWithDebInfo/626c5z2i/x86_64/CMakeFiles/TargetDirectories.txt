@@ -1,0 +1,2 @@
+D:/Desktop/futolo/android/app/.cxx/RelWithDebInfo/626c5z2i/x86_64/CMakeFiles/edit_cache.dir
+D:/Desktop/futolo/android/app/.cxx/RelWithDebInfo/626c5z2i/x86_64/CMakeFiles/rebuild_cache.dir

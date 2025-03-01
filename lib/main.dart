@@ -24,7 +24,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: Text('Flutter App')),
+        appBar: AppBar(title: Text('Futolo')),
         drawer: Drawer(
           child: ListView(
             padding: EdgeInsets.zero,

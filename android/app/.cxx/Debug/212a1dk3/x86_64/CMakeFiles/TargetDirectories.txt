@@ -1,0 +1,2 @@
+C:/Users/shaheer/Desktop/FUTOLO/Futsal-Management-Application-1/android/app/.cxx/Debug/212a1dk3/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/shaheer/Desktop/FUTOLO/Futsal-Management-Application-1/android/app/.cxx/Debug/212a1dk3/x86_64/CMakeFiles/rebuild_cache.dir

@@ -35,8 +35,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        backgroundColor:
-            Color.fromARGB(255, 249, 249, 249), // Dark background for the app
+        backgroundColor: Color(0xFF1A434E), // Dark background for the app
 
         drawer: Drawer(
           child: ListView(
@@ -98,23 +97,6 @@ class _MyAppState extends State<MyApp> {
             ? SelectFieldPage()
             : ListView(
                 children: [
-                  // Welcome Message with White Background
-                  Container(
-                    color: Colors
-                        .white, // White background for the welcome message
-                    padding: EdgeInsets.all(16.0),
-                    child: Center(
-                      child: Text(
-                        'Welcome to Futolo! 🌟\nConnect with your community, share moments, and explore turfs near you.',
-                        style: TextStyle(
-                          color: Color(0xFFC3F44D), // Dark text color
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
                   // Example Posts
                   PostWidget(
                     username: 'Alex Johnson',
@@ -126,7 +108,7 @@ class _MyAppState extends State<MyApp> {
                   PostWidget(
                     username: 'Maria Garcia',
                     imageUrl:
-                        'C:/Users/shaheer/Desktop/FUTOLO/Futsal-Management-Application-1/assets/Maria Garcia.jpg', // Replace with your image path
+                        'assets/Maria Garcia.jpg', // Replace with your image path
                     likes: 189,
                     comments: 32,
                   ),
@@ -181,11 +163,9 @@ class PostWidget extends StatelessWidget {
     return Container(
       margin: EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color:
-            Color.fromARGB(255, 195, 244, 77), // Dark background for the post
+        color: Color(0xFF61D384), // Dark background for the post
         borderRadius: BorderRadius.circular(12), // Rounded corners
-        border: Border.all(
-            color: Color.fromARGB(255, 0, 0, 0), width: 2), // Dark green border
+        border: Border.all(width: 2), // Dark green border
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,24 +175,22 @@ class PostWidget extends StatelessWidget {
               backgroundColor: Color(0xFFC3F44D),
               child: Text(username[0], style: TextStyle(color: Colors.black)),
             ),
-            title: Text(username, style: TextStyle(color: Colors.white)),
+            title: Text(username, style: TextStyle(color: Color(0xFF1A434E))),
           ),
           ClipRRect(
             borderRadius:
                 BorderRadius.circular(12), // Rounded corners for the image
             child: Container(
               decoration: BoxDecoration(
-                border: Border.all(
-                    color: Colors.black,
-                    width: 2), // Black border for the image
+                border: Border.all(width: 2), // Black border for the image
                 borderRadius:
                     BorderRadius.circular(12), // Rounded corners for the image
               ),
               child: Image.asset(
                 imageUrl,
                 fit: BoxFit.cover,
-                width: double.infinity,
-                height: 200, // Adjust height as needed
+                width: double.infinity, // Adjust width as needed
+                height: 350, // Adjust height as needed
               ),
             ),
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'booking_page.dart'; // Import the BookingPage
+import 'booking_page.dart';
+import 'selectfield_page.dart'; // Import the SelectFieldPage
 
 void main() {
   runApp(const MyApp());
@@ -85,7 +86,7 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
         body: _selectedIndex == 0
-            ? BookingPage()
+            ? SelectFieldPage()
             : ListView(
                 children: [
                   // Welcome Message with White Background
@@ -145,6 +146,9 @@ class _MyAppState extends State<MyApp> {
           ],
         ),
       ),
+      routes: {
+        '/BookingPage': (context) => BookingPage(),
+      },
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'booking_page.dart';
 import 'selectfield_page.dart'; // Import the SelectFieldPage
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'comment_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -145,7 +146,7 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class PostWidget extends StatelessWidget {
+class PostWidget extends StatefulWidget {
   final String username;
   final String imageUrl;
   final int likes;
@@ -156,14 +157,44 @@ class PostWidget extends StatelessWidget {
     required this.imageUrl,
     required this.likes,
     required this.comments,
-  });
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  _PostWidgetState createState() => _PostWidgetState();
+}
+
+class _PostWidgetState extends State<PostWidget> {
+  bool isLiked = false;
+  late int likeCount;
+
+  @override
+  void initState() {
+    super.initState();
+    likeCount = widget.likes;
+  }
+
+  void toggleLike() {
+    setState(() {
+      isLiked = !isLiked;
+      likeCount += isLiked ? 1 : -1;
+    });
+  }
+
+  void openCommentScreen(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => CommentScreen(username: widget.username),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.all(8),
+      margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Color(0xFF61D384), // Dark background for the post
+        color: const Color(0xFF61D384), // Dark background for the post
         borderRadius: BorderRadius.circular(12), // Rounded corners
         border: Border.all(width: 2), // Dark green border
       ),
@@ -172,10 +203,12 @@ class PostWidget extends StatelessWidget {
         children: [
           ListTile(
             leading: CircleAvatar(
-              backgroundColor: Color(0xFFC3F44D),
-              child: Text(username[0], style: TextStyle(color: Colors.black)),
+              backgroundColor: const Color(0xFFC3F44D),
+              child: Text(widget.username[0],
+                  style: const TextStyle(color: Colors.black)),
             ),
-            title: Text(username, style: TextStyle(color: Color(0xFF1A434E))),
+            title: Text(widget.username,
+                style: const TextStyle(color: Color(0xFF1A434E))),
           ),
           ClipRRect(
             borderRadius:
@@ -183,11 +216,10 @@ class PostWidget extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 border: Border.all(width: 2), // Black border for the image
-                borderRadius:
-                    BorderRadius.circular(12), // Rounded corners for the image
+                borderRadius: BorderRadius.circular(12), // Rounded corners
               ),
               child: Image.asset(
-                imageUrl,
+                widget.imageUrl,
                 fit: BoxFit.cover,
                 width: double.infinity, // Adjust width as needed
                 height: 350, // Adjust height as needed
@@ -198,14 +230,26 @@ class PostWidget extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
-                Icon(Icons.favorite, color: Colors.red),
-                SizedBox(width: 4),
-                Text('$likes likes', style: TextStyle(color: Colors.white)),
-                SizedBox(width: 16),
-                Icon(Icons.comment, color: Color(0xFF61D384)),
-                SizedBox(width: 4),
-                Text('$comments comments',
-                    style: TextStyle(color: Colors.white)),
+                // Like Button
+                IconButton(
+                  icon: Icon(
+                    isLiked ? Icons.favorite : Icons.favorite_border,
+                    color: isLiked ? Colors.red : Colors.white,
+                  ),
+                  onPressed: toggleLike,
+                ),
+                Text('$likeCount likes',
+                    style: const TextStyle(color: Colors.white)),
+
+                const SizedBox(width: 16),
+
+                // Comment Button
+                IconButton(
+                  icon: Icon(Icons.comment, color: Color(0xFF1A434E)),
+                  onPressed: () => openCommentScreen(context), // Now it works!
+                ),
+                Text('${widget.comments} comments',
+                    style: const TextStyle(color: Colors.white)),
               ],
             ),
           ),

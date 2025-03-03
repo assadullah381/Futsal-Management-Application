@@ -20,14 +20,6 @@ class _BookingPageState extends State<BookingPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text(
-          "Futolo Booking",
-          style: GoogleFonts.poppins(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
         centerTitle: true,
       ),
       body: Padding(
@@ -55,7 +47,7 @@ class _BookingPageState extends State<BookingPage> {
         borderRadius: BorderRadius.circular(20),
         image: DecorationImage(
           image: AssetImage(
-              "assets/futsal_court.jpg"), // Change this to your image asset
+              "assets/futsal-court-construction.jpg"), // Change this to your image asset
           fit: BoxFit.cover,
         ),
       ),

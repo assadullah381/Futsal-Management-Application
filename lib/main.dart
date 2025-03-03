@@ -27,10 +27,7 @@ class _MyAppState extends State<MyApp> {
       home: Scaffold(
         backgroundColor:
             Color.fromARGB(255, 249, 249, 249), // Dark background for the app
-        appBar: AppBar(
-          title: Text('Futolo', style: TextStyle(color: Colors.white)),
-          backgroundColor: Color.fromARGB(255, 3, 72, 23),
-        ),
+
         drawer: Drawer(
           child: ListView(
             padding: EdgeInsets.zero,

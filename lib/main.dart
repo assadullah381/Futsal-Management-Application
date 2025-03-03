@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'booking_page.dart';
 import 'selectfield_page.dart'; // Import the SelectFieldPage
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,7 +15,15 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 2;
+
+  final List<Widget> _screens = [
+    BookingPage(),
+    Text("Chat Page"),
+    SelectFieldPage(),
+    Text("Community Page"),
+    Text("Ranking Page"),
+  ];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -130,20 +139,21 @@ class _MyAppState extends State<MyApp> {
                   ),
                 ],
               ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          selectedItemColor: Color(0xFF61D384),
-          unselectedItemColor: Colors.grey,
-          onTap: _onItemTapped,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Booking'),
-            BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.people), label: 'Community'),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.emoji_events), label: 'Ranking'),
+        bottomNavigationBar: CurvedNavigationBar(
+          backgroundColor: Color(0xFF1A434E), // Background of screen
+          color: Colors.black, // Bar color
+          buttonBackgroundColor: Color(0xFF61D384), // Highlighted item color
+          height: 60,
+          animationDuration: Duration(milliseconds: 300),
+          index: _selectedIndex,
+          items: [
+            Icon(Icons.book, color: Colors.white),
+            Icon(Icons.chat, color: Colors.white),
+            Icon(Icons.home, color: Colors.white),
+            Icon(Icons.people, color: Colors.white),
+            Icon(Icons.emoji_events, color: Colors.white),
           ],
+          onTap: _onItemTapped,
         ),
       ),
       routes: {

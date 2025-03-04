@@ -30,6 +30,8 @@ class _CommentScreenState extends State<CommentScreen> {
         title: Text('Comments', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black, // Black AppBar
         iconTheme: IconThemeData(color: Colors.white),
+        elevation: 10,
+        shadowColor: Colors.greenAccent,
       ),
       body: Column(
         children: [
@@ -41,8 +43,20 @@ class _CommentScreenState extends State<CommentScreen> {
                   margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                   padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Color(0xFF61D384), // Green comment box
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF61D384), Color(0xFF1A434E)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,11 +68,19 @@ class _CommentScreenState extends State<CommentScreen> {
                       SizedBox(width: 10),
                       Expanded(
                         child: Container(
-                          padding:
-                              EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 15),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: Colors.white.withOpacity(0.9),
                             borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                spreadRadius: 1,
+                                blurRadius: 3,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
                           ),
                           child: Text(
                             comments[index],
@@ -77,27 +99,62 @@ class _CommentScreenState extends State<CommentScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: commentController,
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: 'Add a comment...',
-                      hintStyle: TextStyle(color: Colors.white70),
-                      filled: true,
-                      fillColor: Colors.black,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
-                      ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
                     ),
-                    onSubmitted: (value) =>
-                        addComment(), // Allows Enter key to submit
+                    child: TextField(
+                      controller: commentController,
+                      style: TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: 'Add a comment...',
+                        hintStyle: TextStyle(color: Colors.white70),
+                        filled: true,
+                        fillColor: Colors.transparent,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide:
+                              BorderSide(color: Color(0xFF61D384), width: 2),
+                        ),
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      ),
+                      onSubmitted: (value) =>
+                          addComment(), // Allows Enter key to submit
+                    ),
                   ),
                 ),
                 SizedBox(width: 10),
-                IconButton(
-                  icon: Icon(Icons.send, color: Color(0xFF61D384)),
-                  onPressed: addComment,
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: Icon(Icons.send, color: Color(0xFF61D384)),
+                    onPressed: addComment,
+                  ),
                 ),
               ],
             ),

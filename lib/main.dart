@@ -5,6 +5,7 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'comment_screen.dart';
 import 'login.dart';
 import 'signup.dart';
+import 'choicecard.dart';
 
 void main() {
   runApp(const MyApp());
@@ -37,7 +38,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: '/login', // Set the initial route to the login page
+      initialRoute: '/choicecard', // Set the initial route to the login page
       routes: {
         '/': (context) => Scaffold(
               backgroundColor: Color(0xFF1A434E), // Dark background for the app
@@ -148,7 +149,8 @@ class _MyAppState extends State<MyApp> {
             ),
         '/booking_page': (context) => BookingPage(),
         '/login': (context) => LoginPage(),
-        '/signup': (context) => SignUpPage(),
+        '/signup': (context) => SignupPage(),
+        '/choicecard': (context) => UserChoicePage(),
       },
     );
   }

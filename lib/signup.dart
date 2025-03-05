@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'login.dart';
+import 'main.dart';
 
 void main() {
   runApp(FutoloApp());
@@ -24,171 +24,134 @@ class SignupPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFF1A434E),
-      body: Stack(
-        children: [
-          // Background Gradient
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: 300,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF61D384), Color(0xFFC3F44D)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 30),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(40),
+                    bottomRight: Radius.circular(40),
+                  ),
                 ),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(100),
-                  bottomRight: Radius.circular(100),
+                child: Row(
+                  children: [
+                    Icon(Icons.arrow_back, color: Colors.black),
+                    SizedBox(width: 10),
+                    Text(
+                      "Create Account.",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ),
+              SizedBox(height: 30),
 
-          // Signup Form
-          Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 30),
-              child: Column(
+              // Form Fields
+              _buildTextField("Full Name"),
+              SizedBox(height: 15),
+              _buildTextField("Email"),
+              SizedBox(height: 15),
+              _buildTextField("Phone Number"),
+              SizedBox(height: 15),
+              _buildTextField("Password", obscureText: true),
+              SizedBox(height: 15),
+              _buildTextField("Confirm Password", obscureText: true),
+              SizedBox(height: 15),
+
+              // Terms Checkbox
+              Row(
+                children: [
+                  Checkbox(
+                    value: false,
+                    onChanged: (value) {},
+                    activeColor: Color(0xFF61D384),
+                  ),
+                  Text(
+                    "Agree to terms and conditions",
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ],
+              ),
+              SizedBox(height: 15),
+
+              // Sign Up Button
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MyApp()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+                ),
+                child: Text(
+                  "Sign Up",
+                  style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
+              SizedBox(height: 15),
+
+              // Sign In Option
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    "Create Account",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 30),
-
-                  // Full Name TextField
-                  TextField(
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: "Full Name",
-                      hintStyle: TextStyle(color: Colors.white70),
-                      filled: true,
-                      fillColor: Colors.black26,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 15),
-
-                  // Email TextField
-                  TextField(
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: "Email",
-                      hintStyle: TextStyle(color: Colors.white70),
-                      filled: true,
-                      fillColor: Colors.black26,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 15),
-
-                  // Password TextField
-                  TextField(
-                    obscureText: true,
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: "Password",
-                      hintStyle: TextStyle(color: Colors.white70),
-                      filled: true,
-                      fillColor: Colors.black26,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-
-                  // Sign Up Button
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFFC3F44D),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 80, vertical: 15),
-                    ),
-                    child: Text(
-                      "Sign up",
-                      style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  SizedBox(height: 15),
-
-                  // OR Divider
-                  Text(
-                    "or",
-                    style: TextStyle(color: Colors.white70, fontSize: 16),
-                  ),
-                  SizedBox(height: 10),
-
-                  // Social Login Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        onPressed: () {},
-                        icon: FaIcon(FontAwesomeIcons.facebook,
-                            color: Colors.white),
-                      ),
-                      SizedBox(width: 20),
-                      IconButton(
-                        onPressed: () {},
-                        icon: FaIcon(FontAwesomeIcons.google,
-                            color: Colors.white),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 15),
-
-                  // Login Link
-                  TextButton(
-                    onPressed: () {
-                      // Navigate to the login page
+                  Text("Already have an account? ",
+                      style: TextStyle(color: Colors.white70)),
+                  GestureDetector(
+                    onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => LoginPage()),
                       );
                     },
-                    child: RichText(
-                      text: TextSpan(
-                        text: "Already have an account? ",
-                        style: TextStyle(color: Colors.white70),
-                        children: [
-                          TextSpan(
-                            text: "Log in",
-                            style: TextStyle(
-                                color: Color(0xFFC3F44D),
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
+                    child: Text(
+                      "Sign in",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline),
                     ),
                   ),
                 ],
               ),
-            ),
+            ],
           ),
-        ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(String hint, {bool obscureText = false}) {
+    return TextField(
+      obscureText: obscureText,
+      style: TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(color: Colors.white70),
+        filled: true,
+        fillColor: Colors.black26,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide.none,
+        ),
       ),
     );
   }

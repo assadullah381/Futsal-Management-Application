@@ -143,7 +143,7 @@ class SelectFieldPage extends StatelessWidget {
                             right: 16,
                             child: GestureDetector(
                               onTap: () {
-                                Navigator.pushNamed(context, '/bookingPage');
+                                Navigator.pushNamed(context, '/booking_page');
                               },
                               child: CircleAvatar(
                                 backgroundColor: Color(0xFFC3F44D),

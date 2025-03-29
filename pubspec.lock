@@ -139,7 +139,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-<<<<<<< HEAD
   flutter_web_auth_2:
     dependency: transitive
     description:
@@ -161,7 +160,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-=======
   font_awesome_flutter:
     dependency: "direct main"
     description:
@@ -170,7 +168,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "10.8.0"
->>>>>>> eac4025bde1bb26eee8e3e31a3ff59e3ca2ae95d
   google_fonts:
     dependency: "direct main"
     description:

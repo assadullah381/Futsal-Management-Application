@@ -3,7 +3,7 @@ import 'booking_page.dart';
 import 'selectfield_page.dart';
 import 'comment_screen.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'comment_screen.dart';
+import 'package:appwrite/appwrite.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,13 +32,13 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 2;
-  late Client client;
+  late Client clients;
 
   @override
   void initState() {
     super.initState();
-    client = Client();
-    client.setProject('67d0e2dd00399b43677c');
+    clients = Client();
+    clients.setProject('67d0e2dd00399b43677c');
   }
 
   final List<Widget> _screens = [

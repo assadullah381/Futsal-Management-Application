@@ -6,10 +6,7 @@ import 'comment_screen.dart';
 import 'login.dart';
 import 'signup.dart';
 import 'choicecard.dart';
-
-void main() {
-  runApp(const MyApp());
-}
+import 'gettingstarted.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -21,13 +18,13 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   int _selectedIndex = 2;
 
-  final List<Widget> _screens = [
-    BookingPage(),
-    Text("Chat Page"),
-    SelectFieldPage(),
-    Text("Community Page"),
-    Text("Ranking Page"),
-  ];
+  // final List<Widget> _screens = [
+  //   BookingPage(),
+  //   Text("Chat Page"),
+  //   SelectFieldPage(),
+  //   Text("Community Page"),
+  //   Text("Ranking Page"),
+  // ];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -38,7 +35,8 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: '/choicecard', // Set the initial route to the login page
+      initialRoute:
+          '/gettingstarted', // Set the initial route to the login page
       routes: {
         '/': (context) => Scaffold(
               backgroundColor: Color(0xFF1A434E), // Dark background for the app
@@ -151,6 +149,7 @@ class _MyAppState extends State<MyApp> {
         '/login': (context) => LoginPage(),
         '/signup': (context) => SignupPage(),
         '/choicecard': (context) => UserChoicePage(),
+        '/gettingstarted': (context) => GettingStartedPage(),
       },
     );
   }
@@ -167,8 +166,8 @@ class PostWidget extends StatefulWidget {
     required this.imageUrl,
     required this.likes,
     required this.comments,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   _PostWidgetState createState() => _PostWidgetState();

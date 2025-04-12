@@ -1,25 +1,17 @@
 import 'package:flutter/material.dart';
 import 'login.dart';
-import 'main.dart';
+import 'homepage.dart';
 
 void main() {
-  runApp(FutoloApp());
-}
-
-class FutoloApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primaryColor: Color(0xFF61D384),
-      ),
-      home: SignupPage(),
-    );
-  }
+  runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: SignupPage(),
+  ));
 }
 
 class SignupPage extends StatelessWidget {
+  const SignupPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

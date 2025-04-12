@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class CommentScreen extends StatefulWidget {
   final String username;
 
-  CommentScreen({required this.username});
+  const CommentScreen({super.key, required this.username});
 
   @override
   _CommentScreenState createState() => _CommentScreenState();

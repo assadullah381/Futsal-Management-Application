@@ -1,14 +1,9 @@
+// register.dart
 import 'package:flutter/material.dart';
-import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
-import 'main.dart';
+import 'appwrite_service.dart';
 import 'login.dart';
-
-Client client = Client()
-  ..setEndpoint('https://fra.cloud.appwrite.io/v1')
-  ..setProject('67d0e2dd00399b43677c').setSelfSigned(status: true);
-
-final account = Account(client);
+import 'main.dart';
 
 class SignupPage extends StatefulWidget {
   @override
@@ -42,7 +37,7 @@ class _SignupPageState extends State<SignupPage> {
     setState(() => _isLoading = true);
 
     try {
-      await account.create(
+      await AppwriteService.account.create(
         userId: ID.unique(),
         email: email,
         password: password,
@@ -51,7 +46,6 @@ class _SignupPageState extends State<SignupPage> {
 
       _showMessage("Account created successfully!");
 
-      // Navigate to main app
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => MyApp()),
@@ -206,11 +200,4 @@ class _SignupPageState extends State<SignupPage> {
       ),
     );
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: SignupPage(),
-  ));
 }

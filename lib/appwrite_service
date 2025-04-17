@@ -1,0 +1,10 @@
+import 'package:appwrite/appwrite.dart';
+
+class AppwriteService {
+    Client client = Client()
+    ..setEndpoint('https://cloud.appwrite.io/v1')
+    ..setProject('67d0e2dd00399b43677c'); // Your Project ID
+  
+
+  static final account = Account(client);
+}

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'signup.dart';
+import 'register.dart';
 import 'main.dart';
 
 void main() {

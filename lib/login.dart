@@ -1,29 +1,75 @@
 import 'package:flutter/material.dart';
+import 'package:appwrite/appwrite.dart';
+import 'package:appwrite/models.dart' as models;
+import 'appwrite_service.dart'; // Import your Appwrite setup
 import 'register.dart';
-import 'main.dart';
-import 'register.dart';
+import 'homepage.dart';
 
-void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: LoginPage(),
-  ));
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+class _LoginPageState extends State<LoginPage> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _isLoading = false;
+
+  void _loginUser() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      _showMessage("Please fill in all fields");
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      // Step 1: Delete current session if one exists
+      await AppwriteService.account.deleteSession(sessionId: 'current');
+    } catch (e) {
+      // It's okay if there's no active session
+    }
+
+    try {
+      // Step 2: Now try to log in with the provided credentials
+      final session = await AppwriteService.account.createEmailPasswordSession(
+        email: email,
+        password: password,
+      );
+
+      _showMessage("Login successful!");
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => HomePage()),
+      );
+    } catch (e) {
+      _showMessage("Login failed: ${e.toString()}");
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1A434E),
+      backgroundColor: const Color(0xFF1A434E),
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 30),
+        padding: const EdgeInsets.symmetric(horizontal: 30),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Welcome Text
-            Text(
+            const Text(
               "Hey, Welcome Back",
               style: TextStyle(
                 fontSize: 28,
@@ -32,11 +78,11 @@ class LoginPage extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 60),
-            // Email Field
+            const SizedBox(height: 60),
             TextField(
-              style: TextStyle(color: Colors.white),
-              decoration: InputDecoration(
+              controller: _emailController,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
                 prefixIcon: Icon(Icons.email, color: Colors.white70),
                 labelText: "Email Id",
                 labelStyle: TextStyle(color: Colors.white70),
@@ -48,12 +94,12 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 20),
-            // Password Field
+            const SizedBox(height: 20),
             TextField(
+              controller: _passwordController,
               obscureText: true,
-              style: TextStyle(color: Colors.white),
-              decoration: InputDecoration(
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
                 prefixIcon: Icon(Icons.lock, color: Colors.white70),
                 labelText: "Password",
                 labelStyle: TextStyle(color: Colors.white70),
@@ -66,88 +112,78 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 30),
-            // Login Button
+            const SizedBox(height: 30),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => SignupPage()),
-                  );
-                },
+                onPressed: _isLoading ? null : _loginUser,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 15),
+                  padding: const EdgeInsets.symmetric(vertical: 15),
                 ),
-                child: Text(
-                  "Login",
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.black)
+                    : const Text(
+                        "Login",
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
             ),
-            SizedBox(height: 10),
-            // Forgot Password
+            const SizedBox(height: 10),
             TextButton(
               onPressed: () {},
-              child: Text(
-                "Forgot password?",
-                style: TextStyle(color: Colors.white70),
-              ),
+              child: const Text("Forgot password?",
+                  style: TextStyle(color: Colors.white70)),
             ),
-            SizedBox(height: 20),
-            // Google Sign-In Button
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: Colors.white),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+            const SizedBox(height: 20),
+            OutlinedButton(
+              onPressed: () {},
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.white),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 15),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset('assets/google_logo.jpg', height: 24),
+                  const SizedBox(width: 10),
+                  const Text(
+                    "Login with Google",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 15),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'assets/google_logo.jpg', // Replace with your Google logo asset
-                      height: 24,
-                    ),
-                    SizedBox(width: 10),
-                    Text(
-                      "Login with Google",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+                ],
               ),
             ),
-            SizedBox(height: 20),
-            // Sign Up Text
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
+                const Text(
                   "Don't have an account?",
                   style: TextStyle(color: Colors.white70),
                 ),
                 TextButton(
-                  onPressed: () {},
-                  child: Text(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => SignupPage()),
+                    );
+                  },
+                  child: const Text(
                     "Sign up",
                     style: TextStyle(
                       color: Colors.white,

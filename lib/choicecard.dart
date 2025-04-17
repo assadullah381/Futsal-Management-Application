@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:futolo/signup.dart';
+import 'package:futolo/register.dart';
 
 class UserChoicePage extends StatefulWidget {
   const UserChoicePage({super.key});

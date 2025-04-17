@@ -1,9 +1,9 @@
 // register.dart
+import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-import 'package:appwrite/models.dart' as models;
 import 'appwrite_service.dart';
 import 'login.dart';
-import 'main.dart';
+import 'homepage.dart';
 
 class SignupPage extends StatefulWidget {
   @override
@@ -48,7 +48,7 @@ class _SignupPageState extends State<SignupPage> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => MyApp()),
+        MaterialPageRoute(builder: (context) => HomePage()),
       );
     } catch (e) {
       _showMessage("Sign up failed: ${e.toString()}");

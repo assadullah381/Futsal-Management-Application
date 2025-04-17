@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 //import 'package:lucide_icons/lucide_icons.dart';
 
 class SelectFieldPage extends StatelessWidget {
+  const SelectFieldPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

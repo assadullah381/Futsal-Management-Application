@@ -1,164 +1,139 @@
 import 'package:flutter/material.dart';
+import 'choicecard.dart';
 
 void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: GettingStartedPage(),
-  ));
+  runApp(FutoloApp());
 }
 
-class GettingStartedPage extends StatelessWidget {
+class FutoloApp extends StatelessWidget {
+  const FutoloApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          // Background Image with Dark Overlay
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image:
-                    AssetImage("assets/futsal_bg.jpg"), // Change to your image
-                fit: BoxFit.cover,
-              ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primaryColor: Color(0xFF61D384),
+      ),
+      home: GettingStartedPage(),
+    );
+  }
+}
+
+class CustomButton extends StatelessWidget {
+  final String text;
+  final VoidCallback onPressed;
+
+  const CustomButton({super.key, required this.text, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 18, horizontal: 36),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(50),
+          color: text == 'Login' ? Colors.white : Color(0xFFC3F44D),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: Offset(0, 3), // Adds a shadow for depth
             ),
+          ],
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: text == 'Login' ? Color(0xFF1A434E) : Color(0xFF1A434E),
           ),
-          Container(
-            color: Colors.black.withOpacity(0.5), // Dark overlay
-          ),
-
-          // Content
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Spacer(),
-
-              // App Name
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Align(
-                  alignment: Alignment.topLeft,
-                  child: Text(
-                    "Futolo",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-
-              // Main Title
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  "Start a new futsal adventure.",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-
-              Spacer(),
-
-              // Bottom Card
-              Container(
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Color(0xFF1A434E),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
-                  ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      "Book futsal courts easily and play with friends!",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 20),
-
-                    // Sign In Button
-                    ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        minimumSize: Size(double.infinity, 50),
-                      ),
-                      child: Text(
-                        "Sign In",
-                        style: TextStyle(
-                          color: Color(0xFF1A434E),
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 10),
-
-                    // Create Account Button
-                    TextButton(
-                      onPressed: () {},
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Or Create Account",
-                            style: TextStyle(
-                              color: Color(0xFFC3F44D),
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Icon(Icons.arrow_right_alt, color: Color(0xFFC3F44D)),
-                        ],
-                      ),
-                    ),
-
-                    SizedBox(height: 10),
-
-                    // Pagination Dots
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _buildDot(true),
-                        _buildDot(false),
-                        _buildDot(false),
-                        _buildDot(false),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
+}
 
-  Widget _buildDot(bool isActive) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 5),
-      width: isActive ? 10 : 8,
-      height: isActive ? 10 : 8,
-      decoration: BoxDecoration(
-        color: isActive ? Color(0xFFC3F44D) : Colors.white38,
-        shape: BoxShape.circle,
+class GettingStartedPage extends StatelessWidget {
+  const GettingStartedPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color(0xFF1A434E),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          SizedBox(height: 60), // Adjusted for top spacing
+          Center(
+            child: Column(
+              children: [
+                Image.asset(
+                  'assets/gettings.jpg', // Replace with your image asset
+                  height: 250,
+                ),
+                SizedBox(height: 20),
+                Text(
+                  "Social Chatter Team.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 30),
+                  child: Text(
+                    "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(bottom: 40, left: 20, right: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: CustomButton(
+                    text: 'Login',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => UserChoicePage()),
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(width: 20),
+                Expanded(
+                  child: CustomButton(
+                    text: 'Sign up',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => UserChoicePage()),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

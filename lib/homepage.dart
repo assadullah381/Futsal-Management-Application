@@ -4,6 +4,11 @@ import 'selectfield_page.dart';
 import 'post.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:appwrite/appwrite.dart';
+import 'comment_screen.dart';
+import 'login.dart';
+import 'signup.dart';
+import 'choicecard.dart';
+import 'gettingstarted.dart';
 
 void main() {
   runApp(const MyApp());
@@ -41,13 +46,13 @@ class _MainScreenState extends State<MainScreen> {
     clients.setProject('67d0e2dd00399b43677c');
   }
 
-  final List<Widget> _screens = [
-    BookingPage(),
-    Text("Chat Page"),
-    SelectFieldPage(),
-    Text("Community Page"),
-    Text("Ranking Page"),
-  ];
+  // final List<Widget> _screens = [
+  //   BookingPage(),
+  //   Text("Chat Page"),
+  //   SelectFieldPage(),
+  //   Text("Community Page"),
+  //   Text("Ranking Page"),
+  // ];
 
   void _onItemTapped(int index) {
     setState(() {

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:futolo/signup.dart';
 
 class UserChoicePage extends StatefulWidget {
+  const UserChoicePage({super.key});
+
   @override
   _UserChoicePageState createState() => _UserChoicePageState();
 }
@@ -43,7 +46,10 @@ class _UserChoicePageState extends State<UserChoicePage> {
               onPressed: selectedUserType.isNotEmpty
                   ? () {
                       // Navigate based on selection
-                      Navigator.pushNamed(context, '/signup');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignupPage()),
+                      );
                     }
                   : null,
               style: ElevatedButton.styleFrom(

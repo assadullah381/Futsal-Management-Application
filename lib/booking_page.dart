@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class BookingPage extends StatefulWidget {
+  const BookingPage({super.key});
+
   @override
   _BookingPageState createState() => _BookingPageState();
 }

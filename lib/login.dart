@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'register.dart';
 import 'main.dart';
+import 'register.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -10,138 +11,151 @@ void main() {
 }
 
 class LoginPage extends StatelessWidget {
+  const LoginPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFF1A434E),
-      body: Center(
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 30),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Curved Top Container
-            Container(
-              width: double.infinity,
-              height: 250,
-              decoration: BoxDecoration(
+            // Welcome Text
+            Text(
+              "Hey, Welcome Back",
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
                 color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  bottomRight: Radius.circular(50),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 60),
+            // Email Field
+            TextField(
+              style: TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.email, color: Colors.white70),
+                labelText: "Email Id",
+                labelStyle: TextStyle(color: Colors.white70),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white70),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white),
                 ),
               ),
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-              alignment: Alignment.bottomLeft,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.arrow_back, color: Colors.black),
-                  SizedBox(height: 20),
-                  Text(
-                    "Welcome Back!",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  Text(
-                    "Continue your adventure.",
-                    style: TextStyle(fontSize: 16, color: Colors.black54),
-                  ),
-                ],
+            ),
+            SizedBox(height: 20),
+            // Password Field
+            TextField(
+              obscureText: true,
+              style: TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.lock, color: Colors.white70),
+                labelText: "Password",
+                labelStyle: TextStyle(color: Colors.white70),
+                suffixIcon: Icon(Icons.visibility, color: Colors.white70),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white70),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white),
+                ),
               ),
             ),
             SizedBox(height: 30),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 30),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Email Field
-                  TextField(
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      labelText: "Email",
-                      labelStyle: TextStyle(color: Colors.white70),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white70),
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                    ),
+            // Login Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SignupPage()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
                   ),
-                  SizedBox(height: 20),
-                  // Password Field
-                  TextField(
-                    obscureText: true,
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      labelText: "Password",
-                      labelStyle: TextStyle(color: Colors.white70),
-                      suffixIcon: Icon(Icons.visibility, color: Colors.white70),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white70),
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                    ),
+                  padding: EdgeInsets.symmetric(vertical: 15),
+                ),
+                child: Text(
+                  "Login",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
                   ),
-                  SizedBox(height: 10),
-                  // Remember Me Checkbox
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: false,
-                        onChanged: (value) {},
-                        activeColor: Color(0xFFC3F44D),
-                      ),
-                      Text("Remember me",
-                          style: TextStyle(color: Colors.white70)),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  // Sign In Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => MyApp()),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                        padding: EdgeInsets.symmetric(vertical: 15),
-                      ),
-                      child: Text(
-                        "Sign In",
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  // Forgot Password
-                  Center(
-                    child: TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        "Forgot password?",
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
+            ),
+            SizedBox(height: 10),
+            // Forgot Password
+            TextButton(
+              onPressed: () {},
+              child: Text(
+                "Forgot password?",
+                style: TextStyle(color: Colors.white70),
+              ),
+            ),
+            SizedBox(height: 20),
+            // Google Sign-In Button
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () {},
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: Colors.white),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  padding: EdgeInsets.symmetric(vertical: 15),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/google_logo.jpg', // Replace with your Google logo asset
+                      height: 24,
+                    ),
+                    SizedBox(width: 10),
+                    Text(
+                      "Login with Google",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            // Sign Up Text
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Don't have an account?",
+                  style: TextStyle(color: Colors.white70),
+                ),
+                TextButton(
+                  onPressed: () {},
+                  child: Text(
+                    "Sign up",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

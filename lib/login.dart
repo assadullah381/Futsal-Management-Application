@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:appwrite/appwrite.dart';
-import 'package:appwrite/models.dart' as models;
 import 'appwrite_service.dart'; // Import your Appwrite setup
 import 'register.dart';
 import 'homepage.dart';

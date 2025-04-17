@@ -4,13 +4,7 @@ import 'package:appwrite/models.dart' as models;
 import 'package:futolo/homepage.dart';
 
 import 'booking_page.dart';
-import 'selectfield_page.dart';
-import 'post.dart';
-import 'comment_screen.dart';
 import 'login.dart';
-import 'register.dart';
-import 'choicecard.dart';
-import 'gettingstarted.dart';
 
 void main() {
   runApp(const MyApp());

@@ -1,8 +1,43 @@
 import 'package:flutter/material.dart';
-//import 'package:lucide_icons/lucide_icons.dart';
+import 'package:appwrite/appwrite.dart';
+import 'package:appwrite/models.dart' as models;
+import 'appwrite_service.dart'; // Import your Appwrite setup
 
-class SelectFieldPage extends StatelessWidget {
+class SelectFieldPage extends StatefulWidget {
   const SelectFieldPage({super.key});
+
+  @override
+  State<SelectFieldPage> createState() => _SelectFieldPageState();
+}
+
+class _SelectFieldPageState extends State<SelectFieldPage> {
+  final Databases databases =
+      Databases(AppwriteService.client); // Initialize with your Appwrite client
+  List<models.Document> fields = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize databases in the declaration itself, no reassignment needed here.
+    fetchFields();
+  }
+
+  Future<void> fetchFields() async {
+    try {
+      final result = await databases.listDocuments(
+        databaseId: 'YOUR_DATABASE_ID',
+        collectionId: 'fields',
+      );
+      setState(() {
+        fields = result.documents;
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching fields: $e');
+      setState(() => isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,114 +89,120 @@ class SelectFieldPage extends StatelessWidget {
               ),
               SizedBox(height: 16.0),
               Expanded(
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: 5,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      width: MediaQuery.of(context).size.width *
-                          0.8, // Set width to 80% of screen width
-                      margin: EdgeInsets.only(right: 16.0),
-                      child: Stack(
-                        children: [
-                          Container(
-                            width: double.infinity,
-                            height: 500,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20.0),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black26,
-                                  blurRadius: 8,
-                                  spreadRadius: 2,
-                                ),
-                              ],
-                              image: DecorationImage(
-                                image:
-                                    AssetImage("assets/field${index + 1}.jpg"),
-                                fit: BoxFit.cover,
-                                colorFilter: ColorFilter.mode(
-                                  // ignore: deprecated_member_use
-                                  Colors.black.withOpacity(0.3),
-                                  BlendMode.darken,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            top: 10,
-                            left: 10,
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 5),
-                              decoration: BoxDecoration(
-                                color: Color(0xFF61D384),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                "\$${50 + index * 10}/Hour",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 20,
-                            left: 16,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                child: isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: fields.length,
+                        itemBuilder: (context, index) {
+                          final field = fields[index];
+                          return Container(
+                            width: MediaQuery.of(context).size.width * 0.8,
+                            margin: EdgeInsets.only(right: 16.0),
+                            child: Stack(
                               children: [
-                                Text(
-                                  "Futsal Arena ${index + 1}",
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.location_on,
-                                      color: Colors.white70,
-                                      size: 16,
-                                    ),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      "City Center",
-                                      style: TextStyle(
-                                        color: Colors.white70,
+                                Container(
+                                  width: double.infinity,
+                                  height: 500,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black26,
+                                        blurRadius: 8,
+                                        spreadRadius: 2,
+                                      ),
+                                    ],
+                                    image: DecorationImage(
+                                      image: NetworkImage(
+                                          field.data['imageUrl'] ?? ''),
+                                      fit: BoxFit.cover,
+                                      colorFilter: ColorFilter.mode(
+                                        Colors.black.withOpacity(0.3),
+                                        BlendMode.darken,
                                       ),
                                     ),
-                                  ],
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 10,
+                                  left: 10,
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 5),
+                                    decoration: BoxDecoration(
+                                      color: Color(0xFF61D384),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      "\$${field.data['pricePerHour']}/Hour",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 20,
+                                  left: 16,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        field.data['name'] ?? 'Futsal Arena',
+                                        style: TextStyle(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.location_on,
+                                            color: Colors.white70,
+                                            size: 16,
+                                          ),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            field.data['location'] ?? 'Unknown',
+                                            style: TextStyle(
+                                              color: Colors.white70,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 20,
+                                  right: 16,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        '/booking_page',
+                                        arguments: field,
+                                      );
+                                    },
+                                    child: CircleAvatar(
+                                      backgroundColor: Color(0xFFC3F44D),
+                                      radius: 20,
+                                      child: Icon(
+                                        Icons.arrow_forward,
+                                        color: Color(0xFF1A434E),
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
-                          ),
-                          Positioned(
-                            bottom: 20,
-                            right: 16,
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.pushNamed(context, '/booking_page');
-                              },
-                              child: CircleAvatar(
-                                backgroundColor: Color(0xFFC3F44D),
-                                radius: 20,
-                                child: Icon(
-                                  Icons.arrow_forward,
-                                  color: Color(0xFF1A434E),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
               ),
             ],
           ),

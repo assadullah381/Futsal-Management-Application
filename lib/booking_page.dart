@@ -1,14 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:appwrite/appwrite.dart';
+import 'package:appwrite/models.dart' as models;
 
 class BookingPage extends StatefulWidget {
-  const BookingPage({super.key});
+  final String fieldName;
+  const BookingPage({super.key, required this.fieldName});
 
   @override
   _BookingPageState createState() => _BookingPageState();
 }
 
 class _BookingPageState extends State<BookingPage> {
+  final Client client = Client()
+    ..setEndpoint('https://fra.cloud.appwrite.io/v1')
+    ..setProject('67d0e2dd00399b43677c');
+
+  late final Databases databases;
+
+  late final Account account;
+  String? userId;
+
+  @override
+  void initState() {
+    super.initState();
+    databases = Databases(client);
+    account = Account(client);
+    getCurrentUser();
+  }
+
+  Future<void> getCurrentUser() async {
+    try {
+      final models.User user = await account.get();
+      setState(() {
+        userId = user.$id;
+      });
+    } catch (e) {
+      print('User not logged in: $e');
+    }
+  }
+
   int selectedDateIndex = 0;
   int selectedTimeIndex = 0;
 
@@ -184,7 +215,36 @@ class _BookingPageState extends State<BookingPage> {
         ),
         SizedBox(height: 20),
         ElevatedButton(
-          onPressed: () {},
+          onPressed: userId == null
+              ? null
+              : () async {
+                  try {
+                    await databases.createDocument(
+                      databaseId: 'your_database_id',
+                      collectionId: 'bookings',
+                      documentId: ID.unique(),
+                      data: {
+                        'userId': userId,
+                        'fieldName': widget.fieldName,
+                        'date': dates[selectedDateIndex],
+                        'timeSlot': times[selectedTimeIndex],
+                        'price': 44.50,
+                        'status': 'pending',
+                      },
+                    );
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Booking successful!')),
+                    );
+
+                    Navigator.pop(context);
+                  } catch (e) {
+                    print('Booking failed: $e');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Booking failed. Try again.')),
+                    );
+                  }
+                },
           style: ElevatedButton.styleFrom(
             backgroundColor: Color(0xFF61D384),
             shape: RoundedRectangleBorder(

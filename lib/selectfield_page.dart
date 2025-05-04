@@ -3,6 +3,8 @@ import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
 import 'appwrite_service.dart'; // Import your Appwrite setup
 
+import 'booking_page.dart'; // Import your BookingPage
+
 class SelectFieldPage extends StatefulWidget {
   const SelectFieldPage({super.key});
 
@@ -182,10 +184,12 @@ class _SelectFieldPageState extends State<SelectFieldPage> {
                                   right: 16,
                                   child: GestureDetector(
                                     onTap: () {
-                                      Navigator.pushNamed(
+                                      Navigator.push(
                                         context,
-                                        '/booking_page',
-                                        arguments: field,
+                                        MaterialPageRoute(
+                                          builder: (context) => BookingPage(
+                                              fieldName: field.data['name']),
+                                        ),
                                       );
                                     },
                                     child: CircleAvatar(

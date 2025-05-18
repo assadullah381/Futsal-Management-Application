@@ -1,202 +1,240 @@
-// register.dart
-import 'package:appwrite/appwrite.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'appwrite_service.dart';
-import 'login.dart';
-import 'homepage.dart';
+import 'package:manganuhu/screens/homepage.dart';
+import 'package:manganuhu/authentication/login.dart';
 
-class SignupPage extends StatefulWidget {
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({Key? key}) : super(key: key);
+
   @override
-  _SignupPageState createState() => _SignupPageState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _SignupPageState extends State<SignupPage> {
-  final _fullNameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-  bool _agreeToTerms = false;
-  bool _isLoading = false;
+class _RegisterScreenState extends State<RegisterScreen> {
+  final DatabaseReference _usersRef = FirebaseDatabase.instance.ref('users');
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  bool isPasswordHidden = true;
+  bool isLoading = false;
 
-  void _signUpUser() async {
-    if (!_agreeToTerms) {
-      _showMessage("Please agree to terms and conditions");
+  void togglePasswordView() {
+    setState(() {
+      isPasswordHidden = !isPasswordHidden;
+    });
+  }
+
+  Future<void> registerUser() async {
+    final name = nameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill in all fields")),
+      );
       return;
     }
 
-    final email = _emailController.text.trim();
-    final password = _passwordController.text;
-    final confirmPassword = _confirmPasswordController.text;
-
-    if (password != confirmPassword) {
-      _showMessage("Passwords do not match");
-      return;
-    }
-
-    setState(() => _isLoading = true);
+    setState(() {
+      isLoading = true;
+    });
 
     try {
-      await AppwriteService.account.create(
-        userId: ID.unique(),
-        email: email,
-        password: password,
-        name: _fullNameController.text.trim(),
-      );
+      // Register the user with Firebase Authentication
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
 
-      _showMessage("Account created successfully!");
+      User? firebaseUser = userCredential.user;
 
-      Navigator.pushReplacement(
+      if (firebaseUser != null) {
+        // Update the user's display name
+        await firebaseUser.updateDisplayName(name);
+
+        // Store user data in Realtime Database
+        await _usersRef.child(firebaseUser.uid).set({
+          'uid': firebaseUser.uid,
+          'name': name,
+          'email': email,
+          'createdAt': ServerValue.timestamp,
+          'emailVerified': false,
+          'profileImage': '',
+          'bio': '',
+        });
+
+        // Send email verification
+        await firebaseUser.sendEmailVerification();
+
+        // Show verification message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Verification email sent! Please verify your email."),
+            duration: Duration(seconds: 5),
+          ),
+        );
+
+        // Check email verification status periodically
+        _checkEmailVerification(firebaseUser);
+      }
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+
+      String errorMessage = "Registration failed";
+      if (e.code == 'email-already-in-use') {
+        errorMessage = "This email is already in use.";
+      } else if (e.code == 'weak-password') {
+        errorMessage = "The password is too weak.";
+      } else if (e.code == 'invalid-email') {
+        errorMessage = "The email address is invalid.";
+      }
+
+      ScaffoldMessenger.of(
         context,
-        MaterialPageRoute(builder: (context) => HomePage()),
-      );
+      ).showSnackBar(SnackBar(content: Text(errorMessage)));
     } catch (e) {
-      _showMessage("Sign up failed: ${e.toString()}");
-    } finally {
-      setState(() => _isLoading = false);
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Somethng went wrong: ${e.toString()}")),
+      );
     }
   }
 
-  void _showMessage(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
-      backgroundColor: Colors.redAccent,
-    ));
+  void _checkEmailVerification(User user) async {
+    // Reload user to get fresh verification status
+    await user.reload();
+    user = FirebaseAuth.instance.currentUser!;
+
+    if (user.emailVerified) {
+      // Update verification status in database
+      await _usersRef.child(user.uid).update({
+        'emailVerified': true,
+        'verifiedAt': ServerValue.timestamp,
+      });
+
+      // Email is verified, navigate to home screen
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      }
+    } else {
+      // Email not verified yet, check again after delay
+      await Future.delayed(const Duration(seconds: 5));
+      _checkEmailVerification(user);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1A434E),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 30),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _header(),
-              SizedBox(height: 30),
-              _buildTextField("Full Name", controller: _fullNameController),
-              SizedBox(height: 15),
-              _buildTextField("Email", controller: _emailController),
-              SizedBox(height: 15),
-              _buildTextField("Phone Number", controller: _phoneController),
-              SizedBox(height: 15),
-              _buildTextField("Password",
-                  controller: _passwordController, obscureText: true),
-              SizedBox(height: 15),
-              _buildTextField("Confirm Password",
-                  controller: _confirmPasswordController, obscureText: true),
-              SizedBox(height: 15),
-              Row(
-                children: [
-                  Checkbox(
-                    value: _agreeToTerms,
-                    onChanged: (value) {
-                      setState(() {
-                        _agreeToTerms = value ?? false;
-                      });
-                    },
-                    activeColor: Color(0xFF61D384),
+      backgroundColor: const Color(0xFFF5F5F5),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                const Text(
+                  'Create Account',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1A237E),
                   ),
-                  Text(
-                    "Agree to terms and conditions",
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                ],
-              ),
-              SizedBox(height: 15),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _signUpUser,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
                 ),
-                child: _isLoading
-                    ? CircularProgressIndicator(color: Colors.black)
-                    : Text(
-                        "Sign Up",
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-              ),
-              SizedBox(height: 15),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("Already have an account? ",
-                      style: TextStyle(color: Colors.white70)),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => LoginPage()));
-                    },
-                    child: Text(
-                      "Sign in",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.underline,
-                      ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Sign up to get started',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+                const SizedBox(height: 40),
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    labelText: 'Full Name',
+                    prefixIcon: const Icon(Icons.person),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(String hint,
-      {TextEditingController? controller, bool obscureText = false}) {
-    return TextField(
-      controller: controller,
-      obscureText: obscureText,
-      style: TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: TextStyle(color: Colors.white70),
-        filled: true,
-        fillColor: Colors.black26,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: BorderSide.none,
-        ),
-      ),
-    );
-  }
-
-  Widget _header() {
-    return Container(
-      padding: EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(40),
-          bottomRight: Radius.circular(40),
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.arrow_back, color: Colors.black),
-          SizedBox(width: 10),
-          Text(
-            "Create Account.",
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    prefixIcon: const Icon(Icons.email_outlined),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: passwordController,
+                  obscureText: isPasswordHidden,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        isPasswordHidden
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: togglePasswordView,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                ElevatedButton(
+                  onPressed: isLoading ? null : registerUser,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1A237E),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    minimumSize: const Size(double.infinity, 50),
+                  ),
+                  child: isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          'Register',
+                          style: TextStyle(fontSize: 16, color: Colors.white),
+                        ),
+                ),
+                const SizedBox(height: 20),
+                const Text("Already have an account?"),
+                TextButton(
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LoginScreen(),
+                            ),
+                          );
+                        },
+                  child: const Text(
+                    'Login',
+                    style: TextStyle(color: Color(0xFF1A237E)),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

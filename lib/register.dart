@@ -52,7 +52,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         // Update the user's display name
         await firebaseUser.updateDisplayName(name);
 
-        // Store user data in Realtime Database
+        // Store user data in Realtime Database with initial pointsEarned set to 0
         await _usersRef.child(firebaseUser.uid).set({
           'uid': firebaseUser.uid,
           'name': name,
@@ -61,6 +61,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'emailVerified': false,
           'profileImage': '',
           'bio': '',
+          'pointsEarned': 0, // Initialize points to 0
         });
 
         // Send email verification
@@ -99,7 +100,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Somethng went wrong: ${e.toString()}")),
+        SnackBar(content: Text("Something went wrong: ${e.toString()}")),
       );
     }
   }
@@ -127,6 +128,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
       // Email not verified yet, check again after delay
       await Future.delayed(const Duration(seconds: 5));
       _checkEmailVerification(user);
+    }
+  }
+
+  // Example method to update points (you can call this from other parts of your app)
+  static Future<void> updateUserPoints(String userId, int pointsToAdd) async {
+    try {
+      final userRef = FirebaseDatabase.instance.ref('users').child(userId);
+
+      // Get current points
+      DatabaseEvent event = await userRef.child('pointsEarned').once();
+      int currentPoints = event.snapshot.value as int? ?? 0;
+
+      // Update points
+      await userRef.update({'pointsEarned': currentPoints + pointsToAdd});
+    } catch (e) {
+      print("Error updating points: $e");
     }
   }
 

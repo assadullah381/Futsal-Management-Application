@@ -3,7 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:manganuhu/screens/homepage.dart';
 import 'package:manganuhu/authentication/register.dart';
-import 'package:manganuhu/screens/admin/adminhomescreen.dart';
+import 'package:manganuhu/admin/adminhomescreen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -25,13 +25,24 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
+  // Moved to a separate method for better organization
+  Future<Map<String, dynamic>?> getUserData(String uid) async {
+    try {
+      final snapshot = await _usersRef.child(uid).get();
+      if (snapshot.exists) {
+        return Map<String, dynamic>.from(snapshot.value as Map);
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error fetching user data: $e');
+      return null;
+    }
+  }
+
   Future<bool> isAdminUser(String uid) async {
     try {
-      final DatabaseReference adminRef = FirebaseDatabase.instance.ref(
-        'admins/$uid',
-      );
-      final DatabaseEvent event = await adminRef.once();
-      return event.snapshot.exists;
+      final snapshot = await FirebaseDatabase.instance.ref('admins/$uid').get();
+      return snapshot.exists;
     } catch (e) {
       debugPrint('Error checking admin status: $e');
       return false;
@@ -43,119 +54,129 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter both email and password')),
-      );
+      showSnackBar('Please enter both email and password');
       return;
     }
+
     setState(() => isLoading = true);
 
     try {
-      // Sign in with Firebase Authentication
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
-      // Check if email is verified
-      if (userCredential.user?.emailVerified ?? false) {
-        // Navigate to Home Screen if successful and verified
-        await _usersRef.child(userCredential.user!.uid).update({
-          'emailVerified': true,
-        });
-        if (await isAdminUser(userCredential.user!.uid)) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Admin login successful')),
-            );
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const AdminHomeScreen()),
-            );
-            return; // Exit after admin login
-          }
-        }
+      if (userCredential.user == null) {
+        showSnackBar('Login failed. Please try again.');
+        return;
+      }
 
+      final user = userCredential.user!;
+
+      if (!user.emailVerified) {
+        await _handleUnverifiedUser(user);
+        return;
+      }
+
+      // Get complete user data including points
+      final userData = await getUserData(user.uid);
+
+      if (await isAdminUser(user.uid)) {
+        showSnackBar('Admin login successful');
         if (mounted) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            MaterialPageRoute(builder: (context) => const AdminHomeScreen()),
           );
         }
-      } else {
-        // Email not verified
-        await _handleUnverifiedUser(userCredential.user!);
+        return;
+      }
+
+      // Regular user login
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(userData: userData),
+          ),
+        );
       }
     } on FirebaseAuthException catch (e) {
       _handleFirebaseAuthError(e);
     } catch (e) {
       _handleGenericError(e);
     } finally {
-      if (mounted) {
-        setState(() => isLoading = false);
-      }
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
   Future<void> _handleUnverifiedUser(User user) async {
-    // Send verification email again
-    await user.sendEmailVerification();
+    try {
+      await user.sendEmailVerification();
+      await FirebaseAuth.instance.signOut();
 
-    if (mounted) {
-      // Show alert dialog
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Email Not Verified'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Please verify your email address first.'),
-              const SizedBox(height: 16),
-              Text(
-                'A new verification email has been sent to ${user.email}',
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Email Not Verified'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Please verify your email address first.'),
+                const SizedBox(height: 16),
+                Text(
+                  'A new verification email has been sent to ${user.email}',
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-
-      // Sign out the user since they're not verified
-      await FirebaseAuth.instance.signOut();
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        showSnackBar('Failed to send verification email: ${e.toString()}');
+      }
     }
   }
 
   void _handleFirebaseAuthError(FirebaseAuthException e) {
-    String errorMessage = 'Login failed. Please try again. ${e.code}';
+    String errorMessage = 'Login failed. Please try again.';
 
-    if (e.code == 'user-not-found') {
-      errorMessage = 'No user found with this email.';
-    } else if (e.code == 'wrong-password') {
-      errorMessage = 'Incorrect password. Please try again.';
-    } else if (e.code == 'invalid-email') {
-      errorMessage = 'The email address is invalid.';
-    } else if (e.code == 'user-disabled') {
-      errorMessage = 'This account has been disabled.';
+    switch (e.code) {
+      case 'user-not-found':
+        errorMessage = 'No user found with this email.';
+        break;
+      case 'wrong-password':
+        errorMessage = 'Incorrect password. Please try again.';
+        break;
+      case 'invalid-email':
+        errorMessage = 'The email address is invalid.';
+        break;
+      case 'user-disabled':
+        errorMessage = 'This account has been disabled.';
+        break;
+      case 'too-many-requests':
+        errorMessage = 'Too many attempts. Try again later.';
+        break;
     }
 
-    if (mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(errorMessage)));
-    }
+    showSnackBar(errorMessage);
   }
 
   void _handleGenericError(dynamic e) {
+    showSnackBar('An unexpected error occurred: ${e.toString()}');
+  }
+
+  void showSnackBar(String message) {
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('An unexpected error occurred: ${e.toString()}'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
     }
   }
 
@@ -163,30 +184,19 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = emailController.text.trim();
 
     if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your email first')),
-      );
+      showSnackBar('Please enter your email first');
       return;
     }
 
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Password reset email sent to $email')),
-        );
-      }
+      showSnackBar('Password reset email sent to $email');
     } on FirebaseAuthException catch (e) {
-      String errorMessage = 'Failed to send reset email';
-      if (e.code == 'user-not-found') {
-        errorMessage = 'No user found with this email.';
-      }
-
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(errorMessage)));
-      }
+      showSnackBar(
+        e.code == 'user-not-found'
+            ? 'No user found with this email.'
+            : 'Failed to send reset email',
+      );
     }
   }
 
@@ -250,7 +260,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: resetPassword,
+                    onPressed: isLoading ? null : resetPassword,
                     child: const Text('Forgot Password?'),
                   ),
                 ),

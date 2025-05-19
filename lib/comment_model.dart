@@ -1,4 +1,4 @@
-import 'package:intl/intl.dart';
+import 'intl.dart';
 
 class Comment {
   final String id;

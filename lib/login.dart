@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:manganuhu/screens/homepage.dart';
-import 'package:manganuhu/authentication/register.dart';
-import 'package:manganuhu/admin/adminhomescreen.dart';
+import 'homepage.dart';
+import 'register.dart';
+import 'adminhomescreen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);

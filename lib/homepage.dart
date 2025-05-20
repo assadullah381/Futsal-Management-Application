@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'booking_page.dart';
 import 'selectfield_page.dart';
-import 'comment_screen.dart';
+import 'models/comment_screen.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:appwrite/appwrite.dart';
 

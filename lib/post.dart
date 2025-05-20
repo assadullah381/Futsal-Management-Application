@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'comment_screen.dart';
+import 'models/comment_screen.dart';
 
 class PostWidget extends StatefulWidget {
   final String username;

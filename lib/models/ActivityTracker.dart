@@ -1,4 +1,4 @@
-import 'firebase_database.dart';
+import '../firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ActivityTracker {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'comment_model.dart';
+import '../comment_model.dart';
 import 'dart:convert';
 
 class Post {

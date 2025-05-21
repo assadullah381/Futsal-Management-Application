@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
-import 'package:futolo/homepage.dart';
+import 'package:futolo/screens/homepage.dart';
 
 import 'booking_page.dart';
 import 'login.dart';

@@ -6,6 +6,14 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 
+// Reuse the same green color palette
+const Color darkForestGreen = Color(0xFF0A2810);
+const Color pineGreen = Color(0xFF1A3F1A);
+const Color fernGreen = Color(0xFF3A5F3A);
+const Color leafGreen = Color(0xFF4C8C4C);
+const Color mintGreen = Color(0xFF8FC18F);
+const Color lightMint = Color(0xFFC1E1C1);
+
 class ChallengesScreen extends StatefulWidget {
   const ChallengesScreen({super.key});
 
@@ -20,20 +28,17 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
   final DatabaseReference _usersRef = FirebaseDatabase.instance.ref('users');
   final User? _currentUser = FirebaseAuth.instance.currentUser;
 
-  // Use BehaviorSubject or ValueNotifier to share stream data
   late Stream<DatabaseEvent> _challengesStream;
   late Stream<DatabaseEvent> _completedChallengesStream;
   late StreamSubscription<DatabaseEvent> _challengesSubscription;
   late StreamSubscription<DatabaseEvent> _completedChallengesSubscription;
 
-  // Store the latest snapshot values
   Map<dynamic, dynamic>? _challengesData;
   Map<dynamic, dynamic>? _completedChallengesData;
 
   @override
   void initState() {
     super.initState();
-    // Create the stream once
     _challengesStream = _challengesRef.onValue;
     if (_currentUser != null) {
       _completedChallengesStream = _usersRef
@@ -42,7 +47,6 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
           .onValue;
     }
 
-    // Listen to the streams and store the data
     _challengesSubscription = _challengesStream.listen((event) {
       if (event.snapshot.value != null) {
         setState(() {
@@ -80,21 +84,25 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Challenges'),
-          bottom: const TabBar(
-            tabs: [
+          title: const Text(
+            'Challenges',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: pineGreen,
+          iconTheme: const IconThemeData(color: Colors.white),
+          bottom: TabBar(
+            indicatorColor: leafGreen,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white70,
+            tabs: const [
               Tab(icon: Icon(Icons.emoji_events), text: 'All Challenges'),
               Tab(icon: Icon(Icons.done_all), text: 'Completed'),
             ],
           ),
         ),
+        backgroundColor: lightMint.withOpacity(0.1),
         body: TabBarView(
-          children: [
-            // All Challenges Tab
-            _buildAllChallengesTab(),
-            // Completed Challenges Tab
-            _buildCompletedChallengesTab(),
-          ],
+          children: [_buildAllChallengesTab(), _buildCompletedChallengesTab()],
         ),
       ),
     );
@@ -102,7 +110,11 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
 
   Widget _buildAllChallengesTab() {
     if (_challengesData == null) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(leafGreen),
+        ),
+      );
     }
 
     final challenges = _challengesData!.entries.toList();
@@ -120,6 +132,10 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
 
         return Card(
           margin: const EdgeInsets.only(bottom: 16),
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: InkWell(
             onTap: () => _showChallengeDetails(context, challenge, deadline),
             child: Padding(
@@ -129,14 +145,15 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.emoji_events, size: 24),
+                      Icon(Icons.emoji_events, size: 24, color: leafGreen),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           data['title'] as String,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
+                            color: darkForestGreen,
                           ),
                         ),
                       ),
@@ -144,29 +161,34 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                   ),
                   const SizedBox(height: 8),
                   if (data['image'] != null)
-                    SizedBox(
-                      height: 150,
-                      width: double.infinity,
-                      child: Image.memory(
-                        base64Decode(data['image'] as String),
-                        fit: BoxFit.cover,
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: SizedBox(
+                        height: 150,
+                        width: double.infinity,
+                        child: Image.memory(
+                          base64Decode(data['image'] as String),
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.star, size: 16, color: Colors.amber),
+                      Icon(Icons.star, size: 16, color: Colors.amber),
                       const SizedBox(width: 4),
-                      Text('${data['rewardPoints']} points'),
+                      Text(
+                        '${data['rewardPoints']} points',
+                        style: TextStyle(color: fernGreen),
+                      ),
                       const Spacer(),
-                      const Icon(Icons.timer, size: 16),
+                      Icon(Icons.timer, size: 16, color: fernGreen),
                       const SizedBox(width: 4),
                       Text(
                         _formatTimeRemaining(timeRemaining),
                         style: TextStyle(
-                          color: timeRemaining.isNegative
-                              ? Colors.red
-                              : Colors.green,
+                          color:
+                              timeRemaining.isNegative ? Colors.red : leafGreen,
                         ),
                       ),
                     ],
@@ -182,13 +204,20 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
 
   Widget _buildCompletedChallengesTab() {
     if (_currentUser == null) {
-      return const Center(
-        child: Text('Please login to view completed challenges'),
+      return Center(
+        child: Text(
+          'Please login to view completed challenges',
+          style: TextStyle(color: fernGreen),
+        ),
       );
     }
 
     if (_completedChallengesData == null) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(leafGreen),
+        ),
+      );
     }
 
     final completedIds = _completedChallengesData!.keys.toList();
@@ -197,11 +226,20 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
       future: _getChallengesByIds(completedIds.cast<String>()),
       builder: (context, challengeSnapshot) {
         if (challengeSnapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(leafGreen),
+            ),
+          );
         }
 
         if (!challengeSnapshot.hasData || challengeSnapshot.data!.isEmpty) {
-          return const Center(child: Text('No completed challenges found'));
+          return Center(
+            child: Text(
+              'No completed challenges found',
+              style: TextStyle(color: fernGreen),
+            ),
+          );
         }
 
         final challenges = challengeSnapshot.data!;
@@ -218,6 +256,10 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
 
             return Card(
               margin: const EdgeInsets.only(bottom: 16),
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -225,33 +267,43 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                   children: [
                     Text(
                       data['title'] as String,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        color: darkForestGreen,
                       ),
                     ),
                     const SizedBox(height: 8),
                     if (data['image'] != null)
-                      SizedBox(
-                        height: 120,
-                        width: double.infinity,
-                        child: Image.memory(
-                          base64Decode(data['image'] as String),
-                          fit: BoxFit.cover,
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: SizedBox(
+                          height: 120,
+                          width: double.infinity,
+                          child: Image.memory(
+                            base64Decode(data['image'] as String),
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.star, size: 16, color: Colors.amber),
+                        Icon(Icons.star, size: 16, color: Colors.amber),
                         const SizedBox(width: 4),
-                        Text('${data['rewardPoints']} points earned'),
+                        Text(
+                          '${data['rewardPoints']} points earned',
+                          style: TextStyle(color: fernGreen),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Completed on: ${DateFormat('yyyy-MM-dd – kk:mm').format(completionDate)}',
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: fernGreen.withOpacity(0.7),
+                      ),
                     ),
                   ],
                 ),
@@ -263,15 +315,153 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
     );
   }
 
-  Future<Map<dynamic, dynamic>> _getChallengesByIds(List<String> ids) async {
-    final Map<dynamic, dynamic> challenges = {};
-    for (final id in ids) {
-      final snapshot = await _challengesRef.child(id).get();
-      if (snapshot.exists) {
-        challenges[id] = snapshot.value;
-      }
-    }
-    return challenges;
+  // ... [Keep all your existing methods unchanged until _showChallengeDetails]
+
+  void _showChallengeDetails(
+    BuildContext context,
+    MapEntry<dynamic, dynamic> challenge,
+    DateTime deadline,
+  ) {
+    final timeRemaining = deadline.difference(DateTime.now());
+    final challengeId = challenge.key.toString();
+    final data = challenge.value as Map<dynamic, dynamic>;
+    final isCompleted =
+        _completedChallengesData?.containsKey(challengeId) ?? false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                spreadRadius: 5,
+              ),
+            ],
+          ),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Text(
+                    data['title'] as String,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: darkForestGreen,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                if (data['image'] != null)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(
+                      height: 200,
+                      width: double.infinity,
+                      child: Image.memory(
+                        base64Decode(data['image'] as String),
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 16),
+                Text(
+                  data['description'] as String,
+                  style: TextStyle(color: fernGreen),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Icon(Icons.star, color: Colors.amber),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Reward: ${data['rewardPoints']} points',
+                      style: TextStyle(color: fernGreen),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(Icons.calendar_today, color: fernGreen),
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Deadline: ${DateFormat('yyyy-MM-dd').format(deadline)}',
+                          style: TextStyle(color: fernGreen),
+                        ),
+                        Text(
+                          timeRemaining.isNegative
+                              ? 'Challenge expired'
+                              : 'Time remaining: ${_formatTimeRemaining(timeRemaining)}',
+                          style: TextStyle(
+                            color: timeRemaining.isNegative
+                                ? Colors.red
+                                : leafGreen,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                if (!timeRemaining.isNegative && !isCompleted)
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: leafGreen,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      onPressed: () => _completeChallenge(challengeId),
+                      child: const Text(
+                        'Complete Challenge',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                if (isCompleted)
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: mintGreen,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: const Text(
+                        'Already Completed',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   String _formatTimeRemaining(Duration duration) {
@@ -288,114 +478,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
     }
   }
 
-  void _showChallengeDetails(
-    BuildContext context,
-    MapEntry<dynamic, dynamic> challenge,
-    DateTime deadline,
-  ) {
-    final timeRemaining = deadline.difference(DateTime.now());
-    final challengeId = challenge.key.toString();
-    final data = challenge.value as Map<dynamic, dynamic>;
-    final isCompleted =
-        _completedChallengesData?.containsKey(challengeId) ?? false;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Text(
-                  data['title'] as String,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              if (data['image'] != null)
-                SizedBox(
-                  height: 200,
-                  width: double.infinity,
-                  child: Image.memory(
-                    base64Decode(data['image'] as String),
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              const SizedBox(height: 16),
-              Text(
-                data['description'] as String,
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  const Icon(Icons.star, color: Colors.amber),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Reward: ${data['rewardPoints']} points',
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(Icons.calendar_today),
-                  const SizedBox(width: 8),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Deadline: ${DateFormat('yyyy-MM-dd').format(deadline)}',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      Text(
-                        timeRemaining.isNegative
-                            ? 'Challenge expired'
-                            : 'Time remaining: ${_formatTimeRemaining(timeRemaining)}',
-                        style: TextStyle(
-                          color: timeRemaining.isNegative
-                              ? Colors.red
-                              : Colors.green,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              if (!timeRemaining.isNegative && !isCompleted)
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => _completeChallenge(challengeId),
-                    child: const Text('Complete Challenge'),
-                  ),
-                ),
-              if (isCompleted)
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                    ),
-                    child: const Text('Already Completed'),
-                  ),
-                ),
-              const SizedBox(height: 16),
-            ],
-          ),
-        );
-      },
-    );
-  }
+  // ... [Keep all remaining methods unchanged]
 
   Future<void> _completeChallenge(String challengeId) async {
     if (_currentUser == null) {
@@ -442,5 +525,16 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
       debugPrint('Error updating points: $e');
       rethrow;
     }
+  }
+
+  Future<Map<dynamic, dynamic>> _getChallengesByIds(List<String> ids) async {
+    final Map<dynamic, dynamic> challenges = {};
+    for (final id in ids) {
+      final snapshot = await _challengesRef.child(id).get();
+      if (snapshot.exists) {
+        challenges[id] = snapshot.value;
+      }
+    }
+    return challenges;
   }
 }

@@ -1,11 +1,14 @@
+import 'dart:math';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'screens/homepage.dart';
-import 'login.dart';
+import 'package:manganuhu/screens/homepage.dart';
+import 'package:manganuhu/authentication/login.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
+  final String? referralCode;
+  const RegisterScreen({Key? key, this.referralCode}) : super(key: key);
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -13,11 +16,24 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final DatabaseReference _usersRef = FirebaseDatabase.instance.ref('users');
+  final DatabaseReference _referralCodesRef = FirebaseDatabase.instance.ref(
+    'referralCodes',
+  );
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController referralCodeController = TextEditingController();
   bool isPasswordHidden = true;
   bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill referral code if provided in constructor
+    if (widget.referralCode != null) {
+      referralCodeController.text = widget.referralCode!;
+    }
+  }
 
   void togglePasswordView() {
     setState(() {
@@ -25,14 +41,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
   }
 
+  Future<String> _generateUniqueReferralCode() async {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final random = Random();
+    String code;
+    bool codeExists;
+
+    do {
+      code = '';
+      for (var i = 0; i < 6; i++) {
+        code += chars[random.nextInt(chars.length)];
+      }
+
+      final snapshot = await _referralCodesRef.child(code).once();
+      codeExists = snapshot.snapshot.exists;
+    } while (codeExists);
+
+    return code;
+  }
+
   Future<void> registerUser() async {
     final name = nameController.text.trim();
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
+    final referralCode = referralCodeController.text.trim();
 
     if (name.isEmpty || email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill in all fields")),
+        const SnackBar(content: Text("Please fill in all required fields")),
       );
       return;
     }
@@ -49,10 +85,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
       User? firebaseUser = userCredential.user;
 
       if (firebaseUser != null) {
-        // Update the user's display name
         await firebaseUser.updateDisplayName(name);
 
-        // Store user data in Realtime Database with initial pointsEarned set to 0
+        // Generate a unique referral code for the new user
+        final userReferralCode = await _generateUniqueReferralCode();
+
+        // Determine which referral code to use (precedence to manually entered one)
+        final usedReferralCode =
+            referralCode.isNotEmpty ? referralCode : widget.referralCode;
+
+        // Store user data
         await _usersRef.child(firebaseUser.uid).set({
           'uid': firebaseUser.uid,
           'name': name,
@@ -61,13 +103,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'emailVerified': false,
           'profileImage': '',
           'bio': '',
-          'pointsEarned': 0, // Initialize points to 0
+          'pointsEarned': 0,
+          'referralCode': userReferralCode,
+          'referralCodeUsed': usedReferralCode,
         });
+
+        // Store the referral code mapping
+        await _referralCodesRef.child(userReferralCode).set({
+          'userId': firebaseUser.uid,
+          'createdAt': ServerValue.timestamp,
+        });
+
+        // If a referral code was provided, handle the referral
+        if (usedReferralCode != null && usedReferralCode.isNotEmpty) {
+          await _handleReferralCodeUsage(usedReferralCode, firebaseUser.uid);
+        }
 
         // Send email verification
         await firebaseUser.sendEmailVerification();
 
-        // Show verification message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Verification email sent! Please verify your email."),
@@ -75,7 +129,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         );
 
-        // Check email verification status periodically
         _checkEmailVerification(firebaseUser);
       }
     } on FirebaseAuthException catch (e) {
@@ -105,6 +158,53 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  Future<void> _handleReferralCodeUsage(
+    String referralCode,
+    String newUserId,
+  ) async {
+    try {
+      // Get the referral code info
+      final codeSnapshot = await _referralCodesRef.child(referralCode).once();
+      if (codeSnapshot.snapshot.exists) {
+        final referrerUserId =
+            codeSnapshot.snapshot.child('userId').value as String?;
+
+        if (referrerUserId != null) {
+          // Get referrer's data
+          final referrerSnapshot = await _usersRef.child(referrerUserId).once();
+          if (referrerSnapshot.snapshot.exists) {
+            // Update referrer's points (add 10 points as an example)
+            int currentPoints =
+                referrerSnapshot.snapshot.child('pointsEarned').value as int? ??
+                    0;
+            await _usersRef.child(referrerUserId).update({
+              'pointsEarned': currentPoints + 10,
+            });
+
+            // Record the referral in the referrer's data
+            await _usersRef
+                .child(referrerUserId)
+                .child('referrals')
+                .push()
+                .set({
+              'referredUserId': newUserId,
+              'timestamp': ServerValue.timestamp,
+              'pointsAwarded': 10,
+            });
+
+            // Record the referral in the new user's data
+            await _usersRef.child(newUserId).update({
+              'referredBy': referrerUserId,
+              'referralPointsUsed': 10, // Points given to new user
+            });
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint("Error handling referral code: $e");
+    }
+  }
+
   void _checkEmailVerification(User user) async {
     // Reload user to get fresh verification status
     await user.reload();
@@ -128,22 +228,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       // Email not verified yet, check again after delay
       await Future.delayed(const Duration(seconds: 5));
       _checkEmailVerification(user);
-    }
-  }
-
-  // Example method to update points (you can call this from other parts of your app)
-  static Future<void> updateUserPoints(String userId, int pointsToAdd) async {
-    try {
-      final userRef = FirebaseDatabase.instance.ref('users').child(userId);
-
-      // Get current points
-      DatabaseEvent event = await userRef.child('pointsEarned').once();
-      int currentPoints = event.snapshot.value as int? ?? 0;
-
-      // Update points
-      await userRef.update({'pointsEarned': currentPoints + pointsToAdd});
-    } catch (e) {
-      print("Error updating points: $e");
     }
   }
 
@@ -213,11 +297,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: referralCodeController,
+                  decoration: InputDecoration(
+                    labelText: 'Referral Code (optional)',
+                    prefixIcon: const Icon(Icons.card_giftcard),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    hintText: 'Enter a friend\'s referral code',
+                  ),
+                ),
                 const SizedBox(height: 30),
                 ElevatedButton(
                   onPressed: isLoading ? null : registerUser,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1A237E),
+                    backgroundColor: const Color.fromARGB(255, 22, 102, 32),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -245,7 +341,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         },
                   child: const Text(
                     'Login',
-                    style: TextStyle(color: Color(0xFF1A237E)),
+                    style: TextStyle(color: Color.fromARGB(255, 22, 102, 32)),
                   ),
                 ),
               ],

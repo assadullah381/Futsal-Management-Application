@@ -18,6 +18,13 @@ import 'package:manganuhu/screens/notificationscreen.dart';
 import 'package:manganuhu/screens/profilescreen.dart';
 import 'package:manganuhu/screens/storescreen.dart';
 
+const Color darkForestGreen = Color(0xFF0A2810);
+const Color pineGreen = Color(0xFF1A3F1A);
+const Color fernGreen = Color(0xFF3A5F3A);
+const Color leafGreen = Color(0xFF4C8C4C);
+const Color mintGreen = Color(0xFF8FC18F);
+const Color lightMint = Color(0xFFC1E1C1);
+
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic>? userData;
 
@@ -53,23 +60,24 @@ class _HomeScreenState extends State<HomeScreen> {
         .equalTo(currentUserEmail)
         .onValue
         .listen((event) {
-      if (event.snapshot.value != null) {
-        final data = event.snapshot.value as Map<dynamic, dynamic>;
-        final pendingNotifications = data.values
-            .where(
-              (notification) => notification['status'] == 'pending',
-            )
-            .length;
+          if (event.snapshot.value != null) {
+            final data = event.snapshot.value as Map<dynamic, dynamic>;
+            final pendingNotifications =
+                data.values
+                    .where(
+                      (notification) => notification['status'] == 'pending',
+                    )
+                    .length;
 
-        setState(() {
-          _unreadNotificationCount = pendingNotifications;
+            setState(() {
+              _unreadNotificationCount = pendingNotifications;
+            });
+          } else {
+            setState(() {
+              _unreadNotificationCount = 0;
+            });
+          }
         });
-      } else {
-        setState(() {
-          _unreadNotificationCount = 0;
-        });
-      }
-    });
   }
 
   @override
@@ -83,9 +91,10 @@ class _HomeScreenState extends State<HomeScreen> {
     _postsRef.orderByChild('timestamp').onValue.listen((event) {
       if (event.snapshot.value != null) {
         final data = event.snapshot.value as Map<dynamic, dynamic>;
-        final loadedPosts = data.entries.map((entry) {
-          return Post.fromMap(entry.value, entry.key);
-        }).toList();
+        final loadedPosts =
+            data.entries.map((entry) {
+              return Post.fromMap(entry.value, entry.key);
+            }).toList();
 
         // Sort posts by timestamp in descending order (newest first)
         loadedPosts.sort((a, b) => b.timestamp.compareTo(a.timestamp));
@@ -193,10 +202,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 16),
                         Expanded(
                           child: StreamBuilder(
-                            stream: _postsRef
-                                .child(post.id)
-                                .child('comments')
-                                .onValue,
+                            stream:
+                                _postsRef
+                                    .child(post.id)
+                                    .child('comments')
+                                    .onValue,
                             builder: (context, snapshot) {
                               if (!snapshot.hasData) {
                                 return const Center(
@@ -204,16 +214,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                 );
                               }
 
-                              final commentsData = snapshot.data!.snapshot.value
+                              final commentsData =
+                                  snapshot.data!.snapshot.value
                                       as Map<dynamic, dynamic>? ??
                                   {};
                               final comments =
                                   commentsData.entries.map((entry) {
-                                return Comment.fromMap(
-                                  entry.value,
-                                  entry.key,
-                                );
-                              }).toList();
+                                    return Comment.fromMap(
+                                      entry.value,
+                                      entry.key,
+                                    );
+                                  }).toList();
 
                               if (comments.isEmpty) {
                                 return const Center(
@@ -231,12 +242,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                       backgroundImage:
                                           comment.userAvatarUrl != null
                                               ? NetworkImage(
-                                                  comment.userAvatarUrl!,
-                                                )
+                                                comment.userAvatarUrl!,
+                                              )
                                               : null,
-                                      child: comment.userAvatarUrl == null
-                                          ? const Icon(Icons.person)
-                                          : null,
+                                      child:
+                                          comment.userAvatarUrl == null
+                                              ? const Icon(Icons.person)
+                                              : null,
                                     ),
                                     title: Text(comment.userName),
                                     subtitle: Column(
@@ -308,10 +320,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final currentUserEmail = FirebaseAuth.instance.currentUser?.email;
     if (currentUserEmail == null) return;
 
-    final snapshot = await _notificationsRef
-        .orderByChild('receiverEmail')
-        .equalTo(currentUserEmail)
-        .once();
+    final snapshot =
+        await _notificationsRef
+            .orderByChild('receiverEmail')
+            .equalTo(currentUserEmail)
+            .once();
 
     if (snapshot.snapshot.value != null) {
       final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
@@ -336,7 +349,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ecomanga'),
+        title: const Text('Ecomanga', style: TextStyle(color: Colors.white)),
+        backgroundColor: pineGreen,
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           badges.Badge(
             position: badges.BadgePosition.topEnd(top: -10, end: -10),
@@ -348,7 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             showBadge: _unreadNotificationCount > 0,
             child: IconButton(
-              icon: const Icon(Icons.notifications),
+              icon: const Icon(Icons.notifications, color: Colors.white),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -356,38 +371,42 @@ class _HomeScreenState extends State<HomeScreen> {
                     builder: (context) => const NotificationsScreen(),
                   ),
                 );
-                // Mark notifications as read when opening
                 _markNotificationsAsRead();
               },
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.account_circle),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ProfileScreen(),
-              ),
-            ),
+            icon: const Icon(Icons.account_circle, color: Colors.white),
+            onPressed:
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProfileScreen(),
+                  ),
+                ),
           ),
         ],
       ),
-      body: _posts.isEmpty
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: _posts.length,
-              itemBuilder: (context, index) => _PostCard(
-                post: _posts[index],
-                onToggleLike: _toggleLike,
-                onShowComments: _showCommentsSheet,
+      body:
+          _posts.isEmpty
+              ? const Center(child: CircularProgressIndicator())
+              : ListView.builder(
+                itemCount: _posts.length,
+                itemBuilder:
+                    (context, index) => _PostCard(
+                      post: _posts[index],
+                      onToggleLike: _toggleLike,
+                      onShowComments: _showCommentsSheet,
+                    ),
               ),
-            ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const CreatePostScreen()),
-        ),
-        child: const Icon(Icons.add),
+        onPressed:
+            () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const CreatePostScreen()),
+            ),
+        backgroundColor: leafGreen,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
       bottomNavigationBar: _buildBottomNavBar(),
     );
@@ -399,37 +418,33 @@ class _HomeScreenState extends State<HomeScreen> {
       onTap: (index) {
         setState(() => _currentIndex = index);
         if (index == 1) {
-          // Community tab index
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const CommunityScreen()),
           );
         } else if (index == 2) {
-          // Marketplace tab index
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const NewsScreen()),
           );
         } else if (index == 3) {
-          // Marketplace tab index
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ProductScreen()),
           );
         } else if (index == 4) {
-          // Challenges tab index
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ChallengesScreen()),
           );
         } else {
-          // Home tab index
           setState(() => _currentIndex = index);
         }
       },
       type: BottomNavigationBarType.fixed,
-      selectedItemColor: const Color(0xFF1A237E),
+      selectedItemColor: leafGreen,
       unselectedItemColor: Colors.grey,
+      backgroundColor: Colors.white,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
         BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Community'),
@@ -458,9 +473,8 @@ class _PostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
-    final isLikeda =
+    final isLiked =
         currentUserId != null && post.likedBy.contains(currentUserId);
-    final theme = Theme.of(context);
 
     return GestureDetector(
       onTap: () => _showFullScreenPost(context),
@@ -468,22 +482,32 @@ class _PostCard extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 2,
+        color: Colors.white,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header with user info
-            Padding(
+            Container(
               padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: mintGreen.withOpacity(0.2),
+                border: Border(
+                  bottom: BorderSide(color: mintGreen.withOpacity(0.3)),
+                ),
+              ),
               child: Row(
                 children: [
                   CircleAvatar(
                     radius: 20,
-                    backgroundImage: post.userAvatarUrl != null
-                        ? NetworkImage(post.userAvatarUrl!)
-                        : null,
-                    child: post.userAvatarUrl == null
-                        ? const Icon(Icons.person, size: 20)
-                        : null,
+                    backgroundImage:
+                        post.userAvatarUrl != null
+                            ? NetworkImage(post.userAvatarUrl!)
+                            : null,
+                    child:
+                        post.userAvatarUrl == null
+                            ? const Icon(Icons.person, size: 20)
+                            : null,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -492,8 +516,9 @@ class _PostCard extends StatelessWidget {
                       children: [
                         Text(
                           post.userName,
-                          style: theme.textTheme.bodyMedium?.copyWith(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
+                            color: darkForestGreen,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -502,8 +527,9 @@ class _PostCard extends StatelessWidget {
                           DateFormat(
                             'MMM d, y • h:mm a',
                           ).format(post.timestamp),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.grey,
+                          style: TextStyle(
+                            color: fernGreen.withOpacity(0.7),
+                            fontSize: 12,
                           ),
                         ),
                       ],
@@ -515,37 +541,40 @@ class _PostCard extends StatelessWidget {
 
             // Post content
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (post.subject.isNotEmpty) ...[
                     Text(
                       post.subject,
-                      style: theme.textTheme.titleSmall?.copyWith(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
+                        color: pineGreen,
+                        fontSize: 16,
                       ),
                     ),
                     const SizedBox(height: 4),
                   ],
-                  // Replace the current image display code in _PostCard with:
                   if (post.imageBase64 != null && post.imageBase64!.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: GestureDetector(
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => FullScreenImageView(
-                                imageFile: File.fromRawPath(
-                                  base64Decode(post.imageBase64!),
+                          onTap:
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (context) => FullScreenImageView(
+                                        imageFile: File.fromRawPath(
+                                          base64Decode(post.imageBase64!),
+                                        ),
+                                        onClose: () => Navigator.pop(context),
+                                      ),
                                 ),
-                                onClose: () => Navigator.pop(context),
                               ),
-                            ),
-                          ),
                           child: Image.memory(
                             base64Decode(post.imageBase64!),
                             height: 200,
@@ -557,7 +586,7 @@ class _PostCard extends StatelessWidget {
                     ),
                   Text(
                     post.content,
-                    style: theme.textTheme.bodyMedium,
+                    style: TextStyle(color: darkForestGreen),
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -567,33 +596,44 @@ class _PostCard extends StatelessWidget {
             ),
 
             // Action buttons
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: lightMint.withOpacity(0.1),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(12),
+                  bottomRight: Radius.circular(12),
+                ),
+              ),
               child: Row(
                 children: [
                   IconButton(
                     icon: Icon(
-                      isLikeda ? Icons.favorite : Icons.favorite_border,
-                      color: isLikeda ? Colors.red : theme.iconTheme.color,
+                      isLiked ? Icons.favorite : Icons.favorite_border,
+                      color: isLiked ? Colors.red : fernGreen,
                     ),
                     onPressed: () => onToggleLike(post),
                   ),
-                  Text(post.likes.toString(), style: theme.textTheme.bodySmall),
+                  Text(
+                    post.likes.toString(),
+                    style: TextStyle(color: fernGreen),
+                  ),
                   const SizedBox(width: 8),
                   IconButton(
-                    icon: const Icon(Icons.comment_outlined),
+                    icon: Icon(Icons.comment_outlined, color: fernGreen),
                     onPressed: () => onShowComments(post),
                   ),
                   Text(
                     post.commentCount.toString(),
-                    style: theme.textTheme.bodySmall,
+                    style: TextStyle(color: fernGreen),
                   ),
                   const Spacer(),
                   if (post.hasImage)
                     Text(
                       '${post.imageSizeKB}KB',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.grey,
+                      style: TextStyle(
+                        color: fernGreen.withOpacity(0.6),
+                        fontSize: 12,
                       ),
                     ),
                 ],
@@ -607,160 +647,165 @@ class _PostCard extends StatelessWidget {
 
   void _showFullScreenPost(BuildContext context) {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
-    final isLikeda =
+    final isLiked =
         currentUserId != null && post.likedBy.contains(currentUserId);
+
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => Scaffold(
-          appBar: AppBar(
-            backgroundColor: Colors.black,
-            elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
-          backgroundColor: Colors.black,
-          body: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // User info
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundImage: post.userAvatarUrl != null
-                            ? NetworkImage(post.userAvatarUrl!)
-                            : null,
-                        child: post.userAvatarUrl == null
-                            ? const Icon(Icons.person, size: 24)
-                            : null,
-                      ),
-                      const SizedBox(width: 16),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+        builder:
+            (context) => Scaffold(
+              appBar: AppBar(
+                backgroundColor: pineGreen,
+                elevation: 0,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+              backgroundColor: Colors.white,
+              body: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // User info
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
                         children: [
-                          Text(
-                            post.userName,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          CircleAvatar(
+                            radius: 24,
+                            backgroundImage:
+                                post.userAvatarUrl != null
+                                    ? NetworkImage(post.userAvatarUrl!)
+                                    : null,
+                            child:
+                                post.userAvatarUrl == null
+                                    ? const Icon(Icons.person, size: 24)
+                                    : null,
                           ),
-                          Text(
-                            DateFormat(
-                              'MMM d, y • h:mm a',
-                            ).format(post.timestamp),
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14,
-                            ),
+                          const SizedBox(width: 16),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                post.userName,
+                                style: TextStyle(
+                                  color: pineGreen,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                DateFormat(
+                                  'MMM d, y • h:mm a',
+                                ).format(post.timestamp),
+                                style: TextStyle(
+                                  color: fernGreen,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
+                    ),
 
-                // Post content
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (post.subject.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Text(
-                            post.subject,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                    // Post content
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (post.subject.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Text(
+                                post.subject,
+                                style: TextStyle(
+                                  color: darkForestGreen,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          Text(
+                            post.content,
+                            style: TextStyle(
+                              color: darkForestGreen,
+                              fontSize: 16,
                             ),
                           ),
-                        ),
-                      Text(
-                        post.content,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
-                ),
-
-                // Image (if exists)
-                if (post.imageBase64 != null)
-                  InteractiveViewer(
-                    panEnabled: true,
-                    minScale: 0.5,
-                    maxScale: 3.0,
-                    child: Center(
-                      child: Image.memory(
-                        base64Decode(post.imageBase64!),
-                        fit: BoxFit.contain,
+                          const SizedBox(height: 16),
+                        ],
                       ),
                     ),
-                  ),
 
-                // Action buttons
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          isLikeda ? Icons.favorite : Icons.favorite_border,
-                          color: isLikeda ? Colors.red : Colors.white,
-                          size: 28,
-                        ),
-                        onPressed: () {
-                          onToggleLike(post);
-                          Navigator.pop(context);
-                        },
-                      ),
-                      Text(
-                        post.likes.toString(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
+                    // Image (if exists)
+                    if (post.imageBase64 != null)
+                      InteractiveViewer(
+                        panEnabled: true,
+                        minScale: 0.5,
+                        maxScale: 3.0,
+                        child: Center(
+                          child: Image.memory(
+                            base64Decode(post.imageBase64!),
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.comment_outlined,
-                          color: Colors.white,
-                          size: 28,
-                        ),
-                        onPressed: () {
-                          Navigator.pop(context);
-                          onShowComments(post);
-                        },
-                      ),
-                      Text(
-                        post.commentCount.toString(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
+
+                    // Action buttons
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: lightMint.withOpacity(0.1),
+                        border: Border(
+                          top: BorderSide(color: mintGreen.withOpacity(0.3)),
                         ),
                       ),
-                    ],
-                  ),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              isLiked ? Icons.favorite : Icons.favorite_border,
+                              color: isLiked ? Colors.red : fernGreen,
+                              size: 28,
+                            ),
+                            onPressed: () {
+                              onToggleLike(post);
+                              Navigator.pop(context);
+                            },
+                          ),
+                          Text(
+                            post.likes.toString(),
+                            style: TextStyle(color: fernGreen, fontSize: 16),
+                          ),
+                          const SizedBox(width: 16),
+                          IconButton(
+                            icon: Icon(
+                              Icons.comment_outlined,
+                              color: fernGreen,
+                              size: 28,
+                            ),
+                            onPressed: () {
+                              Navigator.pop(context);
+                              onShowComments(post);
+                            },
+                          ),
+                          Text(
+                            post.commentCount.toString(),
+                            style: TextStyle(color: fernGreen, fontSize: 16),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
       ),
     );
   }
 }
+} 

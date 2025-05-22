@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'firebase_database.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'screens/homepage.dart';
-import 'register.dart';
-import 'adminhomescreen.dart';
+import 'package:manganuhu/screens/homepage.dart';
+import 'package:manganuhu/authentication/register.dart';
+import 'package:manganuhu/admin/adminhomescreen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -216,7 +216,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A237E),
+                    color: Color.fromARGB(255, 31, 108, 42),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -262,13 +262,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: TextButton(
                     onPressed: isLoading ? null : resetPassword,
                     child: const Text('Forgot Password?'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color(0xff457730),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: isLoading ? null : loginUser,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1A237E),
+                    backgroundColor: const Color.fromARGB(255, 45, 77, 30),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -296,7 +299,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                   child: const Text(
                     'Create an Account',
-                    style: TextStyle(color: Color(0xFF1A237E)),
+                    style: TextStyle(color: Color.fromARGB(255, 32, 138, 36)),
                   ),
                 ),
               ],
